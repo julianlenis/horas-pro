@@ -1,0 +1,76 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#0f172a"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Horas Pro"><link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icon-192.png"><link rel="icon" href="icon-192.png"><title>Horas Pro by Julián Lenis</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:-apple-system,system-ui,sans-serif;background:#0f172a;color:#e2e8f0;padding:env(safe-area-inset-top) 0 env(safe-area-inset-bottom)}
+main{max-width:520px;margin:auto;padding:16px}
+h1{font-size:22px;margin:4px 0 12px}h2{font-size:16px;margin:20px 0 8px;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em}
+.card{background:#1e293b;border-radius:16px;padding:14px;margin-bottom:12px}
+label{display:block;font-size:13px;color:#94a3b8;margin:6px 0 3px}
+input,select{width:100%;padding:11px;border-radius:10px;border:1px solid #334155;background:#0f172a;color:#e2e8f0;font-size:16px}
+.row{display:flex;gap:8px}.row>*{flex:1}
+.btn{border:0;border-radius:14px;padding:18px 8px;font-size:17px;font-weight:700;color:#fff;width:100%;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none}
+.btn:disabled{opacity:.35}.in{background:#16a34a}.out{background:#dc2626}.pa{background:#d97706}.re{background:#2563eb}.edit{background:#475569;color:#fff;font-weight:600}.on{outline:4px solid #fde047;filter:brightness(1.2)}
+.small{padding:8px 12px;font-size:14px;border-radius:10px;background:#334155;width:auto}
+.status{text-align:center;font-size:15px;margin-bottom:10px}.clock{font-size:40px;font-weight:800;text-align:center;font-variant-numeric:tabular-nums}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{padding:6px 4px;text-align:left;border-bottom:1px solid #334155}
+.ot{color:#fbbf24;font-weight:700}.muted{color:#94a3b8;font-size:12px}
+.day{border-bottom:1px solid #334155;padding:8px 0}.day:last-child{border:0}
+.sh{display:flex;justify-content:space-between;align-items:center;font-size:14px;padding:3px 0}
+dialog{background:#1e293b;color:#e2e8f0;border:0;border-radius:16px;width:90%;max-width:420px}
+#print{display:none}
+@media print{body{background:#fff;color:#000;padding:0}main,dialog{display:none!important}#print{display:block;font-family:-apple-system,system-ui,sans-serif;padding:10mm}
+#print table{font-size:11pt}#print td,#print th{border-bottom:1px solid #999;color:#000}#print h1{font-size:18pt}#print .brk{font-size:9pt;white-space:nowrap}#print small{font-size:8pt}@page{size:A4;margin:10mm}}
+.brow{display:flex;gap:4px;align-items:center;margin:4px 0;padding:3px;border-radius:8px}.brow input{flex:1;min-width:0;margin:0;padding:6px 2px;font-size:15px}.brow input::-webkit-calendar-picker-indicator{display:none}.brow .bt{width:22px}.brow .bd{width:52px;font-size:12px;text-align:right;color:#cbd5e1}.brow button{width:auto;padding:6px 8px;margin:0}.brow.bad{background:#fee2e2;outline:2px solid #dc2626}.badd{display:flex;gap:6px;margin:4px 0}.badd button{flex:1;padding:6px;font-size:13px;margin:0}
+</style></head><body><main>
+<h1>⏱️ Horas Pro <span style="font-size:13px;font-weight:600;color:#94a3b8">by Julián Lenis</span></h1>
+<div class="card">
+ <div class="row"><div><label>Nombre del operario</label><input id="worker" list="workers" autocomplete="off"></div>
+ <div><label>Empresa</label><input id="company" list="companies" autocomplete="off"></div></div>
+ <datalist id="workers"></datalist><datalist id="companies"></datalist>
+</div>
+<div class="card">
+ <div class="status" id="status">Sin fichar</div><div class="clock" id="clock">0:00:00</div><div id="brk" style="text-align:center;font-size:13px;opacity:.75;min-height:16px"></div>
+ <div style="text-align:center;margin-top:6px"><button class="btn small edit" id="bFix" style="display:none">✏️ Corregir horas</button></div>
+ <div class="grid" style="margin-top:12px">
+  <button class="btn in" id="bIn">Inicio</button><button class="btn pa" id="bAl">Almuerzo</button>
+  <button class="btn re" id="bCo">Hora de comer</button><button class="btn out" id="bOut">Salida</button>
+ </div>
+</div>
+<h2>Resumen</h2>
+<div class="card">
+ <div class="row"><div><label>Filtrar operario</label><select id="fW"></select></div><div><label>Filtrar empresa</label><select id="fC"></select></div></div>
+ <label>Semanas</label><table id="weeks"></table><label style="margin-top:10px">Meses</label><table id="months"></table>
+</div>
+<h2>Historial</h2><div class="card" id="hist"></div>
+<h2>Ajustes</h2>
+<div class="card">
+ <div class="row"><div><label>Horas normales/día</label><input id="sNormal" type="number" step="0.25" inputmode="decimal"></div>
+ <div><label>Precio hora (€)</label><input id="sRate" type="number" step="0.01" inputmode="decimal"></div></div>
+ <div class="row"><div><label>Multiplicador extra</label><input id="sMult" type="number" step="0.05" inputmode="decimal"></div>
+ <div><label>o precio fijo extra (€)</label><input id="sFixed" type="number" step="0.01" inputmode="decimal" placeholder="0 = usar multiplicador"></div></div>
+ <div class="row" style="margin-top:12px"><button class="btn small" id="bCsv">⬇ Exportar CSV</button><button class="btn small" id="bAdd">＋ Añadir manual</button></div>
+</div>
+<h2>Resumen mensual</h2>
+<div class="card"><div class="row" style="align-items:end"><div><label>Mes (usa los filtros de operario/empresa)</label><input id="pMonth" type="month"></div>
+<button class="btn small" id="bPdf" style="background:#7c3aed;flex:0 0 auto">📄 Resumen mensual PDF</button></div></div>
+<p class="muted" style="text-align:center">Datos guardados solo en este dispositivo.<br>Hecho por Julián Lenis · © 2026</p>
+</main>
+<dialog id="dlgX"><form method="dialog" id="fX"><h3 style="margin-top:0">Corregir horas del turno actual</h3>
+ <label>Inicio del turno</label><input id="xS" type="datetime-local">
+ <label>Descansos</label><div id="xList"></div>
+ <p class="muted">Deja el fin vacío si el descanso sigue en curso. Usa 🗑️ para quitar un descanso.</p>
+ <div class="row" style="margin-top:8px"><button class="btn small" value="cancel">Cancelar</button><button class="btn small" value="ok" style="background:#16a34a">Guardar</button></div></form></dialog>
+<dialog id="dlg"><form method="dialog" id="fEd">
+ <h3 style="margin-top:0">Editar turno</h3>
+ <label>Operario</label><input id="eW" list="workers"><label>Empresa</label><input id="eC" list="companies">
+ <label>Entrada</label><input id="eS" type="datetime-local"><label>Salida</label><input id="eE" type="datetime-local">
+ <label>Descansos (opcional)</label><div id="eList"></div>
+ <div class="row" style="margin-top:14px"><button class="btn small" value="del" style="background:#dc2626">Borrar</button><button class="btn small" value="cancel">Cancelar</button><button class="btn small" value="ok" style="background:#16a34a">Guardar</button></div>
+</form></dialog>
+<section id="print"></section>
+<script src="calc.js?v=10"></script><script src="app.js?v=10"></script></body></html>
